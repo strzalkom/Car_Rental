@@ -2,12 +2,14 @@ package com.strzalkom.domain;
 
 import org.hibernate.validator.constraints.Range;
 
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Objects;
-
+@Entity
 public class Car {
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
     @NotNull
@@ -21,6 +23,7 @@ public class Car {
 
     private int level;
 
+    @OneToOne
     private State state;
 
     public Car() {

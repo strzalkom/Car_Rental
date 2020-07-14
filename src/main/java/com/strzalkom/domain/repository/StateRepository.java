@@ -6,61 +6,56 @@ import com.strzalkom.utils.Ids;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import java.util.*;
+import javax.persistence.PersistenceContext;
 
 @Repository
 public class StateRepository {
 
 
+   @PersistenceContext
+    private EntityManager em;
     Random rand = new Random();
 
-    Map<Integer, State> states = new HashMap<>();
 
-
+    @Transactional
     public void createState(String description) {
-        int newId = Ids.generateNewId(states.keySet());
-        State newState = new State(newId, description);
-        states.put(newId, newState);
+
+        State newState = new State(description);
+        em.persist(newState);
+
+
     }
 
     public List<State> getAll() {
-        return  new ArrayList<>(states.values());
+        return em.createQuery("from State", State.class).getResultList();
+    }
+    @Transactional
+    public void deleteState(State state){
+            em.remove(state);
     }
 
-    public void deleteState(State state) {
-        states.remove(state.getId());
-    }
-
-    @PostConstruct
-    public void init() {
-
-    }
-
-    @Override
-    public String toString() {
-        return "StateRepository{" +
-                "states=" + states +
-                '}';
-    }
-
-
-    public void createRandomState() {
-        List<String> descriptions = new ArrayList<>();
-
-        descriptions.add("Wypożyczony");
-        descriptions.add("Dostępny");
-        descriptions.add("Uszkodzony");
-        descriptions.add("W przygotowaniu");
-
-        String description = descriptions.get(rand.nextInt(descriptions.size()));
-        createState(description);
-    }
-
+//    @Transactional
+//    public void createState(String description) {
+////        List<String> descriptions = new ArrayList<>();
+////
+////        descriptions.add("Wypożyczony");
+////        descriptions.add("Dostępny");
+////        descriptions.add("Dostępny");
+////        descriptions.add("W przygotowaniu");
+//
+////        String description = descriptions.get(rand.nextInt(descriptions.size()));
+//        createState(description);
+//    }
+    @Transactional
     public void update(State state) {
-        states.put(state.getId(), state);
+          em.merge(state);
     }
 
     public State getState(Integer id) {
-        return states.get(id);
+
+        return em.find(State.class, id);
     }
 }
